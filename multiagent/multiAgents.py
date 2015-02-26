@@ -9,7 +9,6 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
-from math import ceil
 
 from game import Agent
 
@@ -64,31 +63,28 @@ class ReflexAgent(Agent):
     # Useful information you can extract from a GameState (pacman.py)
     successorGameState = currentGameState.generatePacmanSuccessor(action)
     newPos = successorGameState.getPacmanPosition()
-    oldFood = currentGameState.getFood().asList()
-    newGhostStates = successorGameState.getGhostStates()
-    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    oldFood = currentGameState.getFood()
+    newGhostStates = successorGameState.getGhostPositions()
+    # newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     "*** YOUR CODE HERE ***"
-    sum = 0
+
+    distances_to_foods = []
     for food in oldFood:
-        mindistancePtoG = 2 ** 32
-        g = []
-        # for ghost in newGhostStates:
-        #     p = str(ghost)
-        #     x,y = int(p[14]), int(p[17])
-        #     print x,y, food
-        #     y = manhattanDistance([x,y], food)
-        #     if(mindistanceGtoF > y):
-        #         mindistanceGtoF = y
-        #         g = [x,y]
+        distances_to_foods.append(manhattanDistance(newPos, food))
+        # print newPos, food
+    closest_food = max(distances_to_foods)
 
-        ptoF = manhattanDistance(newPos, food)
-        ptog = []
-        for ghost in newGhostStates:
-            ptog.append(manhattanDistance(newPos, ghost))
-        sum = sum + (ceil(min(ptog)/ptoF)*len(oldFood)+min(newScaredTimes))
-    return sum
+    distances_to_ghosts=[]
+    for i in newGhostStates:
+        distances_to_ghosts.append(manhattanDistance(newPos, i))
+    closest_ghost = min(distances_to_ghosts)
 
+    state_score = min(closest_ghost,closest_food)
+    if closest_ghost-closest_food >= 0:
+        state_score += min(closest_food, closest_ghost)
+
+    return currentGameState.getScore() + state_score
 
 def scoreEvaluationFunction(currentGameState):
   """
@@ -120,10 +116,42 @@ class MultiAgentSearchAgent(Agent):
     self.evaluationFunction = util.lookup(evalFn, globals())
     self.depth = int(depth)
 
+# node sub class
+class Node():
+
+    def __init__(self, value):
+      self.value = value
+      self.children = []
+
+    def getChildren(self):
+        return self.children
+    def setNodeValue(self, newValue): # currently not needed/used
+        self.value = newValue
+    def getNodeValue(self):
+        return self.value
+    def addChild(self, newNode):
+        self.children.append(newNode)
+
 class MinimaxAgent(MultiAgentSearchAgent):
   """
     Your minimax agent (question 2)
   """
+
+  def miniMax(self, node, depth, player):
+      if depth == 0 or len(node.getChildren()) == 0:
+          return node.getNodeValue()
+      if player:
+          bestValue = -float("inf")
+          for child in node.getChildren():
+              val = self.miniMax(child, depth-1, False)
+              bestValue = max(bestValue, val)
+          return bestValue
+      else:
+          bestValue = float("inf")
+          for child in node.getChildren():
+              val = self.miniMax(child, depth-1, True)
+              bestValue = min(bestValue, val)
+          return bestValue
 
   def getAction(self, gameState):
     """
@@ -147,27 +175,83 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
     "*** YOUR CODE HERE ***"
 
-    """
-     root node saved
-     for loop over legal actions build tree
-     get scores from eval function of the tree
-      for loop over legal actions build tree
-       recursively add up the scores alternating min, max set depth to like 2 or 15
-       parameters(gameState, score, depth)
-    """
-    util.raiseNotDefined()
+    # create a root node for the tree
+    root = self.Node.__init__(self, 0)
+    # set the children of the root node to be a layer of possible moves and the heuristic value of each
+    root.children = self.createLayers(root, gameState, 0)
+
+    # return the minimax value of the tree
+    return self.miniMax(root, self.depth, True)
+
+# recursive method to create the tree with all the values
+def createLayers(self, node, gameState, curDepth):
+
+    # get a list of all the legal moves that can be made
+    legalMoves = gameState.getLegalActions()
+
+    # for each legal move,
+    for action in legalMoves:
+        # create a successor state of pacman where that action is applied
+        successorGameState = gameState.generatePacmanSuccessor(action)
+        # create a new node with a heuristic value of the value returned by the evaluation function
+        newChild = self.Node.__init__(self.evaluationFunction(successorGameState, action))
+        # add the new node as a child of the current node
+        self.addChild(newChild)
+
+    # for each child of the current node
+    for child in node.children:
+        # if we've gone as far in depth as we are supposed to,
+        if curDepth == self.depth:
+            # then break
+            break
+        # otherwise, create a layer of possible moves for the child node
+        child.children = self.createLayers(child, gameState, curDepth+1)
+
+    # return the list of children
+    # when the recursive calls are done, it will be a reference to the entire tree
+    return self.getChildren()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
     Your minimax agent with alpha-beta pruning (question 3)
   """
 
+  def alphaBeta(self, node, depth, a, b, player):
+      if depth == 0 or len(node.getChildren()) == 0:
+          return node.getNodeValue()
+      if player:
+          v = -float("inf")
+          for child in node.getChildren():
+              v = max(v, self.alphaBeta(child, depth-1, a, b, False))
+              a = max(a, v)
+              if b <= a:
+                  break # beta cut off
+          return v
+      else:
+          v = float("inf")
+          for child in node.getChildren():
+              v = min(v, self.alphaBeta(child, depth-1, a, b, True))
+              b = min(b, v)
+              if b <= a:
+                  break # alpha cut off
+          return v
+
   def getAction(self, gameState):
     """
       Returns the minimax action using self.depth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # create a root node for the tree
+    root = self.Node.__init__(self, 0)
+    # set the children of the root node to be a layer of possible moves and the heuristic value of each
+    root.children = self.createLayers(root, gameState, 0)
+
+    a = -float("inf")
+    b = float("inf")
+
+    # return the alphaBeta value of the tree
+    return self.alphaBeta(root, self.depth, a, b, True)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
