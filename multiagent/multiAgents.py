@@ -195,23 +195,22 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
   """
 
   def alphaBeta(self, gameState, depth, a, b, x):
-      if depth == 0:
-          return self.alpha(gameState, a, b)
+      while (depth >= 0):
+          return self.alphaBeta(gameState, depth-1, a, b, x)
       if depth % 2 == 0:
-          x = self.alpha(gameState, a, b)
+          return self.alpha(gameState, a, b)
       else:
-          x = self.beta(gameState, a, b)
-      return max(x, self.alphaBeta(gameState, depth-1, -float("inf"), float("inf"), x))
+          return self.beta(gameState, a, b)
 
   def alpha(self, gameState, a, b):
       v = -float("inf")
       legalActions = gameState.getLegalPacmanActions()
+      actions=[]
       for action in legalActions:
           v = max(v, self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
           a = max(a, v)
           if b <= a:
-              break
-      return v
+              return action
 
   def beta(self, gameState, a, b):
       v = float("inf")
@@ -220,15 +219,15 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           v = min(v, self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
           b = min(b, v)
           if b <= a:
-              break
-      return v
+              return action
+
 
   def getAction(self, gameState):
     """
       Returns the minimax action using self.depth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    return self.alphaBeta(gameState, self.depth, -float("inf"), float("inf"))
+    return self.alphaBeta(gameState, self.depth, -float("inf"), float("inf"), -999999999)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
