@@ -173,6 +173,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
   def alphaBeta(self, gameState, depth, a, b, x):
       if depth == 0:
+          return self.alpha(gameState, a, b)
       if depth % 2 == 0:
           x = self.alpha(gameState, a, b)
       else:
