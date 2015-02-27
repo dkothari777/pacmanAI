@@ -136,27 +136,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
               maxAction = x
       return maxAction
 
-  def mini(self, gameState, depth, score):
-      if(depth == 0):
-          return score
-      legalActions = gameState.getLegalActions()
-      depthScore = []
-      minScore = 999999999
-      for action in legalActions:
-          z = self.evaluationFunction(gameState.generatePacmanSuccessor(action)) + 1
-          score = score + z
-          depthScore.append(self.maxi(gameState.generatePacmanSuccessor(action), depth-1, score))
-      for x in depthScore:
-          if x < minScore:
-              minScore = x
-      return minScore
-
   def maxi(self, gameState, depth, score):
       if(depth == 0):
           return score
       legalActions = gameState.getLegalActions()
-      depthScore=[]
-      maxScore = -9999999999
+      depthScore = []
+      maxScore = -999999999
       for action in legalActions:
           z = self.evaluationFunction(gameState.generatePacmanSuccessor(action)) + 1
           score = score + z
@@ -165,6 +150,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
           if x > maxScore:
               maxScore = x
       return maxScore
+
+  def mini(self, gameState, depth, score):
+      if(depth == 0):
+          return score
+      depthScore=[]
+      miniScore = 9999999999
+      for i in gameState.getNumAgents():
+
+        for action in gameState.getlegalActions(i):
+          z = self.evaluationFunction(gameState.generateSuccessor(i,action)) + 1
+          score = score + z
+          depthScore.append(self.mini(gameState.generateSuccessor(i, action), depth-1, score))
+      for x in depthScore:
+          if x < miniScore:
+              miniScore = xs
+      return miniScore
 
   def getAction(self, gameState):
     """
