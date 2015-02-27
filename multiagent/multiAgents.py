@@ -164,7 +164,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
           depthScore.append(self.mini(gameState.generateSuccessor(i, action), depth-1, score))
       for x in depthScore:
           if x < miniScore:
-              miniScore = xs
+              miniScore = x
       return miniScore
 
   def getAction(self, gameState):
