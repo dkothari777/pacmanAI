@@ -9,6 +9,7 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
+import math
 
 from game import Agent
 
@@ -126,7 +127,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
       maxScore = -99999999999999999999
       depthScore = {}
       for action in legalActions:
-          depthScore[action] = self.mini(gameState.generatePacmanSuccessor(action), depth, score+self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
+          z = self.evaluationFunction(gameState.generatePacmanSuccessor(action))
+          score = score + z + 1
+          depthScore[action] = self.maxi(gameState.generatePacmanSuccessor(action), depth, score)
       for x, y in depthScore.iteritems():
           if(y > maxScore):
               maxScore = y
@@ -137,15 +140,31 @@ class MinimaxAgent(MultiAgentSearchAgent):
       if(depth == 0):
           return score
       legalActions = gameState.getLegalActions()
+      depthScore = []
+      minScore = 999999999
       for action in legalActions:
-          self.maxi(gameState.generatePacmanSuccessor(action), depth-1, score+self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
+          z = self.evaluationFunction(gameState.generatePacmanSuccessor(action)) + 1
+          score = score + z
+          depthScore.append(self.maxi(gameState.generatePacmanSuccessor(action), depth-1, score))
+      for x in depthScore:
+          if x < minScore:
+              minScore = x
+      return minScore
 
   def maxi(self, gameState, depth, score):
       if(depth == 0):
           return score
       legalActions = gameState.getLegalActions()
+      depthScore=[]
+      maxScore = -9999999999
       for action in legalActions:
-          self.mini(gameState.generatePacmanSuccessor(action), depth-1, score+self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
+          z = self.evaluationFunction(gameState.generatePacmanSuccessor(action)) + 1
+          score = score + z
+          depthScore.append(self.mini(gameState.generatePacmanSuccessor(action), depth-1, score))
+      for x in depthScore:
+          if x > maxScore:
+              maxScore = x
+      return maxScore
 
   def getAction(self, gameState):
     """
