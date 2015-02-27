@@ -139,7 +139,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
   def maxi(self, gameState, depth, score):
       if(depth == 0):
           return score
-      legalActions = gameState.getLegalActions()
+      legalActions = gameState.getLegalPacmanActions()
       depthScore = []
       maxScore = -999999999
       for action in legalActions:
