@@ -116,42 +116,32 @@ class MultiAgentSearchAgent(Agent):
     self.evaluationFunction = util.lookup(evalFn, globals())
     self.depth = int(depth)
 
-# node sub class
-class Node():
-
-    def __init__(self, value):
-      self.value = value
-      self.children = []
-
-    def getChildren(self):
-        return self.children
-    def setNodeValue(self, newValue): # currently not needed/used
-        self.value = newValue
-    def getNodeValue(self):
-        return self.value
-    def addChild(self, newNode):
-        self.children.append(newNode)
-
 class MinimaxAgent(MultiAgentSearchAgent):
   """
     Your minimax agent (question 2)
   """
+  def miniMax(self, gameState, depth, score):
+      legalActions = gameState.getLegalActions()
+      depthScore = {}
+      for action in legalActions:
+        depthScore.append([action, min(gameState.generatePacmanSuccessor(action)), depth, score])
 
-  def miniMax(self, node, depth, player):
-      if depth == 0 or len(node.getChildren()) == 0:
-          return node.getNodeValue()
-      if player:
-          bestValue = -float("inf")
-          for child in node.getChildren():
-              val = self.miniMax(child, depth-1, False)
-              bestValue = max(bestValue, val)
-          return bestValue
-      else:
-          bestValue = float("inf")
-          for child in node.getChildren():
-              val = self.miniMax(child, depth-1, True)
-              bestValue = min(bestValue, val)
-          return bestValue
+      return gameState.getLegalActions()
+
+  def min(self, gameState, depth, score):
+      if(depth):
+        legalActions = gameState.getLegalActions()
+      score = []
+      for action in legalActions:
+          score.append(self.evaluationFunction(gameState, action))
+      return min(score)
+
+  def max(self, gameState, depth, score):
+      legalActions = gameState.getLegalActions()
+      score = []
+      for action in legalActions:
+          score.append(self.evaluationFunction(gameState, action))
+      return max(score)
 
   def getAction(self, gameState):
     """
@@ -174,42 +164,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
     "*** YOUR CODE HERE ***"
-
-    # create a root node for the tree
-    root = self.Node.__init__(self, 0)
-    # set the children of the root node to be a layer of possible moves and the heuristic value of each
-    root.children = self.createLayers(root, gameState, 0)
-
-    # return the minimax value of the tree
-    return self.miniMax(root, self.depth, True)
-
-# recursive method to create the tree with all the values
-def createLayers(self, node, gameState, curDepth):
-
-    # get a list of all the legal moves that can be made
-    legalMoves = gameState.getLegalActions()
-
-    # for each legal move,
-    for action in legalMoves:
-        # create a successor state of pacman where that action is applied
-        successorGameState = gameState.generatePacmanSuccessor(action)
-        # create a new node with a heuristic value of the value returned by the evaluation function
-        newChild = self.Node.__init__(self.evaluationFunction(successorGameState, action))
-        # add the new node as a child of the current node
-        self.addChild(newChild)
-
-    # for each child of the current node
-    for child in node.children:
-        # if we've gone as far in depth as we are supposed to,
-        if curDepth == self.depth:
-            # then break
-            break
-        # otherwise, create a layer of possible moves for the child node
-        child.children = self.createLayers(child, gameState, curDepth+1)
-
-    # return the list of children
-    # when the recursive calls are done, it will be a reference to the entire tree
-    return self.getChildren()
+    return self.miniMax(gameState, self.depth, 0)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
