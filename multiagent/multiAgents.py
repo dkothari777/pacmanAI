@@ -175,42 +175,40 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
   """
 
-  def alphaBeta(self, node, depth, a, b, player):
-      if depth == 0 or len(node.getChildren()) == 0:
-          return node.getNodeValue()
-      if player:
-          v = -float("inf")
-          for child in node.getChildren():
-              v = max(v, self.alphaBeta(child, depth-1, a, b, False))
-              a = max(a, v)
-              if b <= a:
-                  break # beta cut off
-          return v
+  def alphaBeta(self, gameState, depth, a, b, x):
+      if depth == 0:
+      if depth % 2 == 0:
+          x = self.alpha(gameState, a, b)
       else:
-          v = float("inf")
-          for child in node.getChildren():
-              v = min(v, self.alphaBeta(child, depth-1, a, b, True))
-              b = min(b, v)
-              if b <= a:
-                  break # alpha cut off
-          return v
+          x = self.beta(gameState, a, b)
+      return max(x, self.alphaBeta(gameState, depth-1, -float("inf"), float("inf"), x))
+
+  def alpha(self, gameState, a, b):
+      v = -float("inf")
+      legalActions = gameState.getLegalPacmanActions()
+      for action in legalActions:
+          v = max(v, self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
+          a = max(a, v)
+          if b <= a:
+              break
+      return v
+
+  def beta(self, gameState, a, b):
+      v = float("inf")
+      legalActions = gameState.getLegalPacmanActions()
+      for action in legalActions:
+          v = min(v, self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
+          b = min(b, v)
+          if b <= a:
+              break
+      return v
 
   def getAction(self, gameState):
     """
       Returns the minimax action using self.depth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-
-    # create a root node for the tree
-    root = self.Node.__init__(self, 0)
-    # set the children of the root node to be a layer of possible moves and the heuristic value of each
-    root.children = self.createLayers(root, gameState, 0)
-
-    a = -float("inf")
-    b = float("inf")
-
-    # return the alphaBeta value of the tree
-    return self.alphaBeta(root, self.depth, a, b, True)
+    return self.alphaBeta(gameState, self.depth, -float("inf"), float("inf"))
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
