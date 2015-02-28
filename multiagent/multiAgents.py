@@ -165,7 +165,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
       for x in depthScore:
           if x < miniScore:
               miniScore = x
-      return miniScore
+      return miniScores
+
+  
 
   def getAction(self, gameState):
     """
