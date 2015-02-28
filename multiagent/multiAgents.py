@@ -164,6 +164,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
               miniScore = x
       return miniScores
 
+  def minimax2(gameState, depth, maximizingPlayer):
+      if depth == 0:
+          return self.evaluationFunction(gameState)
+      if(maximizingPlayer):
+          maxValue = -999999999999
+          for action in gamesState.getLegalPacmanActions():
+              score = minimax2(gameState.generatePacmanSuccessor(action), depth -1, False)
+              maxValue = max(maxVaule, score)
+          return maxValue
+      else:
+          minValue = 99999999999999
+          for i in range(0,gameState.getNumAgents()):
+            for action in gameState.getLegalActions(i):
+                score = minimax2(gameState.geneerateSuccessor(i, action), depth -1, True)
+                minValue = min(minValue, score)
+          return minValue
   
 
   def getAction(self, gameState):
