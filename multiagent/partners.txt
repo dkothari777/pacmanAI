@@ -1,0 +1,2 @@
+Lauren Anglin	langlin@email.arizona.edu	evaluationFunction, AlphaBetaPruning, assisted with miniMax
+Darshan Kothari	dkothari@email.arizona.edu	miniMax, Expectimax, betterEvaluationFunction, assisted with evaluationFunction
