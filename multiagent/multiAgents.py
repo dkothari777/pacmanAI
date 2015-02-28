@@ -192,9 +192,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
   """
 
-  def alphaBeta(self, gameState, depth, a, b, x):
+  def alphaBeta(self, gameState, depth, a, b):
       while (depth >= 0):
-          return self.alphaBeta(gameState, depth-1, a, b, x)
+          return self.alphaBeta(gameState, depth-1, a, b)
       if depth % 2 == 0:
           return self.alpha(gameState, a, b)
       else:
@@ -204,7 +204,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       v = -(float("inf"))
       legalActions = gameState.getLegalPacmanActions()
       for action in legalActions:
-          v = max(v, self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
+          v = max(v, self.evaluationFunction(gameState))
           a = max(a, v)
           if b <= a:
               return action
@@ -214,7 +214,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       v = float("inf")
       legalActions = gameState.getLegalPacmanActions()
       for action in legalActions:
-          v = min(v, self.evaluationFunction(gameState.generatePacmanSuccessor(action)))
+          v = min(v, self.evaluationFunction(gameState))
           b = min(b, v)
           if b <= a:
               return action
@@ -226,7 +226,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       Returns the minimax action using self.depth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    return self.alphaBeta(gameState, self.depth, -float("inf"), float("inf"), -999999999)
+    return self.alphaBeta(gameState, self.depth, -(float("inf")), float("inf"))
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
