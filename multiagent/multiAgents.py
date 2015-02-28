@@ -251,6 +251,26 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     Your expectimax agent (question 4)
   """
 
+  def expectiminimax(self, gameState, depth):
+      gameState.
+      if(depth == 0):
+          return betterEvaluationFunction(gameState)
+      if(depth%2 !=0):
+          a = float("inf")
+          for i in range(1,gameState.getNumAgents()):
+              for action in gameState.generateSuccessor(i, gameState.getLegalActions(i)):
+                a = max(a, self.expectiminimax(gameState.generateSuccessor(i, gameState.getLegalActions(i))), depth - 1)
+      elif(depth%2 == 0 and [ghosts.scaredTimer for ghosts in gameState.getGhostPositions()][0] == 0 ):
+          a = -(float("inf"))
+          for action in gameState.getLegalPacmanActions():
+              a = max(a, self.expectiminimax(gameState.generatePacmanSuccessor(action), depth - 1))
+      else:
+          a = 0
+          for action in gameState.getLegalPacmanActions():
+              a = a + (betterEvaluationFunction(gameState.generatePacmanSuccessor(action)) + self.expectiminimax(gameState.generatePacmanSuccessor(action), depth -1))
+      return a
+
+
   def getAction(self, gameState):
     """
       Returns the expectimax action using self.depth and self.evaluationFunction
@@ -259,17 +279,36 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       legal moves.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    legalactions = gameState.getLegalPacmanActions()
+    maxScore = {}
+    bestVal = -(float("inf"))
+    maxAction = ""
+    for action in legalactions:
+          maxScore[action] = self.expectiminimax(gameState.generatePacmanSuccessor(action), self.depth)
+    for x,y in maxScore.iteritems():
+        if(bestVal< y):
+            bestVal = y
+            maxAction = x
+    return maxAction
 
 def betterEvaluationFunction(currentGameState):
   """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: This heuristic prioritizes winning regardless where the ghosts are. It will avoid all actions
+    from getting a loss unless if it is trapped.
   """
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  ghostScaredTimes =  [ghosts.scaredTimer for ghosts in currentGameState.getGhostPositions()]
+  if(ghostScaredTimes[0] > 0):
+      return ghostScaredTimes + currentGameState.getScore()
+  if(currentGameState.isLose()):
+      return -(float("inf"))
+  elif(currentGameState.isWin()):
+      return float("inf")
+  else:
+    return currentGameState.getScore()
 
 # Abbreviation
 better = betterEvaluationFunction
