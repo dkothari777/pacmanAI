@@ -162,25 +162,26 @@ class MinimaxAgent(MultiAgentSearchAgent):
       for x in depthScore:
           if x > miniScore:
               miniScore = x
-      return miniScores
+      return miniScore
 
-  def minimax2(gameState, depth, maximizingPlayer):
+  def minimax2(self, gameState, depth, maximizingPlayer):
       if depth == 0:
           return self.evaluationFunction(gameState)
       if(maximizingPlayer):
-          maxValue = -999999999999
-          for action in gamesState.getLegalPacmanActions():
-              score = minimax2(gameState.generatePacmanSuccessor(action), depth -1, False)
-              maxValue = max(maxVaule, score)
+          maxValue = -999
+          for action in gameState.getLegalPacmanActions():
+              score = self.minimax2(gameState.generatePacmanSuccessor(action), depth - 1, False)
+              # print score
+              maxValue = max(maxValue, score)
           return maxValue
       else:
-          minValue = 99999999999999
-          for i in range(0,gameState.getNumAgents()):
+          minValue = -999
+          for i in range(1, gameState.getNumAgents()):
             for action in gameState.getLegalActions(i):
-                score = minimax2(gameState.geneerateSuccessor(i, action), depth -1, True)
-                minValue = min(minValue, score)
+                score = self.minimax2(gameState.generateSuccessor(i, action), depth - 1, True)
+                minValue = max(minValue, score)
           return minValue
-  
+
 
   def getAction(self, gameState):
     """
@@ -203,48 +204,62 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
     "*** YOUR CODE HERE ***"
-    return self.miniMax(gameState, self.depth, 0)
+    legalActions = gameState.getLegalPacmanActions()
+    scoresForAction = {}
+    maxAction = ""
+    maxScore = -99999999999999
+    for action in legalActions:
+        scoresForAction[action] = self.minimax2(gameState.generatePacmanSuccessor(action), self.depth, False)
+    for x,y in scoresForAction.iteritems():
+        if(maxScore < y):
+            maxScore = y
+            maxAction = x
+    return maxAction
+    # return self.miniMax(gameState, self.depth, 0)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
     Your minimax agent with alpha-beta pruning (question 3)
   """
 
-  def alphaBeta(self, gameState, depth, a, b):
-      while (depth >= 0):
-          return self.alphaBeta(gameState, depth-1, a, b)
-      if depth % 2 == 0:
-          return self.alpha(gameState, a, b)
+  def alphaBeta(self, gameState, depth, a, b, maximizingPlayer):
+      if depth == 0:
+          return betterEvaluationFunction(gameState)
+      if maximizingPlayer:
+          v = -(float("inf"))
+          for i in range(1, gameState.getNumAgents()):
+            for action in gameState.getLegalActions(i):
+              v = max(v, self.alphaBeta(gameState.generateSuccessor(i, action), depth - 1, a, b, False))
+              a = max(a, v)
+              if b <= a:
+                  break # beta cut-off
+          return v
       else:
-          return self.beta(gameState, a, b)
-
-  def alpha(self, gameState, a, b):
-      v = -(float("inf"))
-      legalActions = gameState.getLegalPacmanActions()
-      for action in legalActions:
-          v = max(v, self.evaluationFunction(gameState))
-          a = max(a, v)
-          if b <= a:
-              return action
-      return Directions.STOP
-
-  def beta(self, gameState, a, b):
-      v = float("inf")
-      legalActions = gameState.getLegalPacmanActions()
-      for action in legalActions:
-          v = min(v, self.evaluationFunction(gameState))
-          b = min(b, v)
-          if b <= a:
-              return action
-      return Directions.STOP
-
+          v = float("inf")
+          legalActions = gameState.getLegalPacmanActions()
+          for action in legalActions:
+              v = min(v, self.alphaBeta(gameState.generatePacmanSuccessor(action), depth - 1, a, b, True))
+              b = min(b, v)
+              if b <= a:
+                  break # alpha cut-off
+          return v
 
   def getAction(self, gameState):
     """
       Returns the minimax action using self.depth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    return self.alphaBeta(gameState, self.depth, -(float("inf")), float("inf"))
+    legalActions = gameState.getLegalPacmanActions()
+    scoresForAction = {}
+    maxAction = ""
+    maxScore = -99999999999999
+    for action in legalActions:
+        scoresForAction[action] = self.alphaBeta(gameState.generatePacmanSuccessor(action), self.depth, -(float("inf")), float("inf"), True)
+    for x,y in scoresForAction.iteritems():
+        if(maxScore < y):
+            maxScore = y
+            maxAction = x
+    return maxAction
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
@@ -269,6 +284,13 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
   """
   "*** YOUR CODE HERE ***"
+
+  if currentGameState.isLose():
+      return -(float("inf"))
+  elif currentGameState.isWin():
+      return float("inf")
+  else:
+      return currentGameState.getScore()
   util.raiseNotDefined()
 
 # Abbreviation
